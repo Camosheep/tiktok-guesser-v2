@@ -7,6 +7,10 @@
   --err: #ff6a6a;
   --muted: #8b8b95;
   --text: #f2f2f7;
+  /* Tier colours for persistent winners */
+  --tier-red: #ff6a6a;
+  --tier-gold: #ffd76a;
+  --tier-platinum: #c0c0ff;
 }
 
 * {
@@ -159,6 +163,16 @@ button.danger {
   color: var(--text);
 }
 
+/* Timer text for displaying remaining time (MM:SS). Positioned below the
+   masked word. Larger font for visibility and centered horizontally. */
+.timerText {
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--accent);
+}
+
 /* Timer bar container and progress bar. The container provides a subtle
    background while the bar itself shows remaining time. Colors transition
    from green to orange to red depending on percentage. */
@@ -175,4 +189,18 @@ button.danger {
   width: 100%;
   transition: width 0.3s linear;
   background: linear-gradient(90deg, var(--ok), var(--warn), var(--err));
+}
+
+/* Boost hint / toast styling. This element appears at the bottom of the
+   overlay card and is used to gently nudge viewers about available
+   monetization options (Tiny Diny, Donut, Money Gun, Galaxy) and to
+   display immediate feedback when a boost is triggered. It uses a
+   slightly faded color and fades in/out via JavaScript. */
+.boostHint {
+  margin-top: 8px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--accent);
+  opacity: 0.8;
+  transition: opacity 0.5s ease;
 }
