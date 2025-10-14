@@ -1,19 +1,37 @@
-const chatEl = document.getElementById("chat");
-const statusEl = document.getElementById("overlay-status");
-const winnerEl = document.getElementById("winner");
+// Helper to ensure an element with a given ID and optional class exists in
+// the overlay. If it does not exist, it is created and appended to the
+// card. This allows the overlay to function even when the HTML file is
+// outdated or missing certain elements.
+function ensureElement(id, className) {
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement("div");
+    el.id = id;
+    if (className) el.className = className;
+    el.style.display = "none";
+    const card = document.querySelector(".card");
+    if (card) card.appendChild(el);
+  }
+  return el;
+}
 
-// Poll status element. Displays live vote tallies for mode selection.
-const pollEl = document.getElementById("poll");
+// Primary overlay elements. If the corresponding element is missing from
+// the DOM, ensureElement will create it. The appropriate class names are
+// provided to preserve styling defined in app.css.
+const chatEl = document.getElementById("chat") || ensureElement("chat", "chat");
+const statusEl = document.getElementById("overlay-status") || ensureElement("overlay-status", "status");
+const winnerEl = document.getElementById("winner") || ensureElement("winner", "winnerBanner");
+const pollEl = document.getElementById("poll") || ensureElement("poll", "");
+let maskedWordEl = document.getElementById("maskedWord");
+let timerTextEl = document.getElementById("timerText");
+let boostHintEl = document.getElementById("boostHint");
+let leaderboardEl = document.getElementById("leaderboard");
 
-// Elements for displaying the masked word and countdown timer. The masked word
-// shows underscores and revealed letters. The timer is displayed as a
-// minutes:seconds string (no progress bar) so it is easier to read on mobile.
-const maskedWordEl = document.getElementById("maskedWord");
-const timerTextEl = document.getElementById("timerText");
-
-// Boost hint element. Used to cycle subtle monetization hints and show
-// immediate feedback when a boost action is triggered. Initially hidden.
-const boostHintEl = document.getElementById("boostHint");
+// Ensure optional elements exist with their classes if they were missing
+maskedWordEl = maskedWordEl || ensureElement("maskedWord", "maskedWord");
+timerTextEl = timerTextEl || ensureElement("timerText", "timerText");
+boostHintEl = boostHintEl || ensureElement("boostHint", "boostHint");
+leaderboardEl = leaderboardEl || ensureElement("leaderboard", "leaderboard");
 
 // Define the rotation of hint messages. These hints subtly remind viewers
 // of the available boosts and their effects. They will rotate every
@@ -26,7 +44,10 @@ const boostHints = [
   "🌌 Galaxy reveals the word",
 ];
 let hintIndex = 0;
-let nextHintAt = Date.now() + 90_000;
+// Schedule the first hint sooner (5 seconds) so that viewers see a hint
+// shortly after loading the overlay. Subsequent hints will appear at
+// randomized 90–120 second intervals.
+let nextHintAt = Date.now() + 5_000;
 
 function rotateHint() {
   const now = Date.now();
@@ -143,6 +164,30 @@ function clearWinnerBannerIfExpired() {
 
 setInterval(clearWinnerBannerIfExpired, 1000);
 
+// Render the leaderboard. Accepts an array of entries sorted by
+// descending wins_total. Each entry should have display_name, wins_total,
+// tier and userId. If the array is empty, hide the leaderboard
+// entirely.
+function renderLeaderboard(data) {
+  if (!data || data.length === 0) {
+    leaderboardEl.style.display = "none";
+    leaderboardEl.innerHTML = "";
+    return;
+  }
+  leaderboardEl.style.display = "block";
+  // Build HTML lines for each leaderboard entry. Use ordinal numbers for
+  // ranks and apply tier colours to names consistent with chat.
+  const lines = data.map((entry, idx) => {
+    let colour = '';
+    if (entry.tier === 'red') colour = "var(--tier-red)";
+    else if (entry.tier === 'gold') colour = "var(--tier-gold)";
+    else if (entry.tier === 'platinum') colour = "var(--tier-platinum)";
+    const nameSpan = `<span style="color:${colour}">${entry.display_name}</span>`;
+    return `${idx + 1}. ${nameSpan} – ${entry.wins_total}`;
+  });
+  leaderboardEl.innerHTML = lines.join('<br>');
+}
+
 const socket = io();
 
 socket.on("bootstrap", (state) => {
@@ -175,6 +220,11 @@ socket.on("bootstrap", (state) => {
     updateMask("");
     // Hide timer text when no round is active
     timerTextEl.style.display = "none";
+  }
+
+  // If leaderboard data is provided in the bootstrap payload, render it now
+  if (state.leaderboard) {
+    renderLeaderboard(state.leaderboard);
   }
 });
 
@@ -237,6 +287,10 @@ socket.on("userUpdate", (data) => {
 socket.on("pollStart", (info) => {
   pollEl.style.display = "block";
   renderPoll({ options: info.options, tallies: {}, endsAt: info.endsAt });
+  // When a poll starts, immediately show instructions on how to vote. Insert at
+  // the start of the poll element so viewers know to type the option names.
+  const instruct = `Vote: type ${info.options.map((opt) => `'${opt}'`).join(' or ')} in chat`;
+  pollEl.textContent = instruct + " | " + pollEl.textContent;
 });
 socket.on("pollUpdate", (msg) => {
   if (msg && msg.tallies) {
@@ -250,6 +304,15 @@ socket.on("pollEnd", (msg) => {
     pollEl.style.display = "none";
     pollEl.textContent = "";
   }, 5000);
+});
+
+// Listen for leaderboard events. When a leaderboard update arrives, render
+// the entries so viewers can see the top players. If the leaderboard is
+// empty, hide the container.
+socket.on("leaderboard", (msg) => {
+  if (msg && Array.isArray(msg.leaderboard)) {
+    renderLeaderboard(msg.leaderboard);
+  }
 });
 
 // When a boost event is received, show an immediate toast in the boostHint
