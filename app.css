@@ -190,3 +190,17 @@ button.danger {
   transition: width 0.3s linear;
   background: linear-gradient(90deg, var(--ok), var(--warn), var(--err));
 }
+
+/* Boost hint / toast styling. This element appears at the bottom of the
+   overlay card and is used to gently nudge viewers about available
+   monetization options (Tiny Diny, Donut, Money Gun, Galaxy) and to
+   display immediate feedback when a boost is triggered. It uses a
+   slightly faded color and fades in/out via JavaScript. */
+.boostHint {
+  margin-top: 8px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--accent);
+  opacity: 0.8;
+  transition: opacity 0.5s ease;
+}

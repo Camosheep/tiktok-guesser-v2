@@ -200,5 +200,52 @@ document.getElementById("resetUsers").onclick = async () => {
   }
 };
 
+// ===================
+// Monetization buttons
+// ===================
+// Tiny Diny: add 10 seconds to the timer
+document.getElementById("boostTiny").onclick = async () => {
+  try {
+    await api("/api/boost/prompt", { extraTimeMs: 10000 });
+    toast("+10 seconds added (Tiny Diny)");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Donut: add 30 seconds to the timer
+document.getElementById("boostDonut").onclick = async () => {
+  try {
+    await api("/api/boost/add-time", { ms: 30000 });
+    toast("+30 seconds added (Donut)");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Money Gun: reveal a random letter
+document.getElementById("boostMoney").onclick = async () => {
+  try {
+    await api("/api/boost/reveal-letter");
+    toast("A letter revealed (Money Gun)");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Galaxy: reveal the entire word
+document.getElementById("boostGalaxy").onclick = async () => {
+  try {
+    await api("/api/boost/reveal-word");
+    toast("Word fully revealed (Galaxy)");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
 refreshState();
 setInterval(refreshState, 3000);

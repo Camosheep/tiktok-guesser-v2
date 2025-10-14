@@ -70,6 +70,18 @@
           <button id="resetUsers" class="danger">Reset tiers & scores</button>
         </div>
 
+        <!-- Monetization / Boost controls. Clicking these buttons triggers a
+             boost effect on the server. Tiny Diny adds 10 seconds, Donut
+             adds 30 seconds, Money Gun reveals a random letter, and
+             Galaxy reveals the entire word. Future versions could replace
+             these with uploaded images. -->
+        <div class="row" style="margin-top:12px; gap:8px; flex-wrap:wrap;">
+          <button id="boostTiny" class="primary">Tiny Diny (+10s)</button>
+          <button id="boostDonut" class="primary">Donut (+30s)</button>
+          <button id="boostMoney" class="primary">Money Gun (Reveal Letter)</button>
+          <button id="boostGalaxy" class="primary">Galaxy (Reveal Word)</button>
+        </div>
+
         <div class="badge" style="margin-top:12px;">
           Tip: In OBS, add Browser Source → http://localhost:3000/overlay
         </div>

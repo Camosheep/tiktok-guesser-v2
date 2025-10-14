@@ -11,6 +11,60 @@ const pollEl = document.getElementById("poll");
 const maskedWordEl = document.getElementById("maskedWord");
 const timerTextEl = document.getElementById("timerText");
 
+// Boost hint element. Used to cycle subtle monetization hints and show
+// immediate feedback when a boost action is triggered. Initially hidden.
+const boostHintEl = document.getElementById("boostHint");
+
+// Define the rotation of hint messages. These hints subtly remind viewers
+// of the available boosts and their effects. They will rotate every
+// 90–120 seconds. You can tweak the messages or durations in admin if
+// necessary. Random intervals add slight unpredictability.
+const boostHints = [
+  "⏱ Tiny Diny adds +10s",
+  "🍩 Donut adds +30s",
+  "💸 Money Gun reveals a letter",
+  "🌌 Galaxy reveals the word",
+];
+let hintIndex = 0;
+let nextHintAt = Date.now() + 90_000;
+
+function rotateHint() {
+  const now = Date.now();
+  if (now >= nextHintAt) {
+    // Show next hint and schedule the next rotation between 90–120s
+    boostHintEl.style.display = "block";
+    boostHintEl.textContent = boostHints[hintIndex % boostHints.length];
+    hintIndex++;
+    // Schedule next rotation with some randomness (90–120s)
+    const interval = 90_000 + Math.floor(Math.random() * 30_000);
+    nextHintAt = now + interval;
+  }
+  // Fades out the hint slowly if there is no boost message overriding it
+  // After 4 seconds of display, reduce opacity to 0 to avoid clutter
+  if (boostHintEl.style.display === "block" && boostHintEl.dataset.temp !== "true") {
+    const displayTime = 4000;
+    // compute how long the current hint has been visible; use timestamp in element dataset
+    if (!boostHintEl.dataset.shownAt) boostHintEl.dataset.shownAt = String(now);
+    const visibleFor = now - Number(boostHintEl.dataset.shownAt);
+    if (visibleFor > displayTime) {
+      boostHintEl.style.opacity = "0";
+      // After fade-out, hide completely and reset dataset
+      setTimeout(() => {
+        if (boostHintEl.dataset.temp !== "true") {
+          boostHintEl.style.display = "none";
+          boostHintEl.style.opacity = "0.8";
+          boostHintEl.dataset.shownAt = "";
+        }
+      }, 500);
+    }
+  }
+}
+
+// Rotate hints regularly. The interval checks every 5 seconds whether to
+// display a new hint. Using a timer rather than one long setTimeout
+// ensures the logic adapts if the page regains focus at a later time.
+setInterval(rotateHint, 5000);
+
 // Track the maximum remaining time (ms) for the current round and the exact
 // timestamp when the round should end. These values are used to update
 // the timer display (minutes:seconds). They are reset when a new round starts
@@ -196,6 +250,41 @@ socket.on("pollEnd", (msg) => {
     pollEl.style.display = "none";
     pollEl.textContent = "";
   }, 5000);
+});
+
+// When a boost event is received, show an immediate toast in the boostHint
+// element. Mark the toast as temporary so that the hint rotation logic
+// doesn’t override or fade it prematurely. After a short duration, hide
+// the toast and resume the regular hint rotation.
+socket.on("boost", (data) => {
+  if (!data) return;
+  let msg = "";
+  if (data.type === "add-time") {
+    const secs = Math.round((data.ms || 0) / 1000);
+    msg = `+${secs}s added!`;
+  } else if (data.type === "reveal-letter") {
+    msg = "A letter was revealed!";
+  } else if (data.type === "reveal-word") {
+    msg = "The word was revealed!";
+  } else if (data.type === "prompt") {
+    const secs = Math.round((data.ms || 0) / 1000);
+    msg = `+${secs}s bonus!`;
+  }
+  if (msg) {
+    boostHintEl.dataset.temp = "true";
+    boostHintEl.style.display = "block";
+    boostHintEl.style.opacity = "1";
+    boostHintEl.textContent = msg;
+    // Clear any prior fade-out timers by removing dataset.shownAt
+    boostHintEl.dataset.shownAt = String(Date.now());
+    // Hide the toast after 4 seconds and resume hint rotation
+    setTimeout(() => {
+      boostHintEl.style.display = "none";
+      boostHintEl.style.opacity = "0.8";
+      delete boostHintEl.dataset.temp;
+      delete boostHintEl.dataset.shownAt;
+    }, 4000);
+  }
 });
 
 // When the server broadcasts a mask update, update the displayed word. This
