@@ -1,0 +1,16 @@
+{
+  "name": "tiktok-guesser-v2",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5",
+    "tiktok-live-connector": "^2.0.0",
+    "xregexp": "^5.1.1"
+  }
+}
