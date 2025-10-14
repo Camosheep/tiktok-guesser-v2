@@ -47,6 +47,41 @@
           <button id="revealWord" class="primary">Reveal word</button>
         </div>
 
+        <!-- Game mode selector. Choose between classic and rapid modes. Changing
+             the mode affects how guesses are evaluated. -->
+        <div class="row" style="margin-top:12px;">
+          <select id="modeSelect">
+            <option value="classic">Classic</option>
+            <option value="rapid">Rapid</option>
+          </select>
+          <button id="setMode" class="primary">Set Mode</button>
+        </div>
+
+        <!-- Live vote controls. Starts or stops a poll allowing viewers to vote
+             for classic or rapid mode via chat. Specify duration in seconds. -->
+        <div class="row" style="margin-top:12px;">
+          <input id="pollDuration" placeholder="Poll duration (seconds)" type="number" min="5" style="width:200px;" />
+          <button id="startPoll" class="primary">Start vote (Classic vs Rapid)</button>
+          <button id="stopPoll" class="danger">Stop vote</button>
+        </div>
+
+        <!-- Reset tiers. Clears all players' win counts and tiers. Use with caution. -->
+        <div class="row" style="margin-top:12px;">
+          <button id="resetUsers" class="danger">Reset tiers & scores</button>
+        </div>
+
+        <!-- Monetization / Boost controls. Clicking these buttons triggers a
+             boost effect on the server. Tiny Diny adds 10 seconds, Donut
+             adds 30 seconds, Money Gun reveals a random letter, and
+             Galaxy reveals the entire word. Future versions could replace
+             these with uploaded images. -->
+        <div class="row" style="margin-top:12px; gap:8px; flex-wrap:wrap;">
+          <button id="boostTiny" class="primary">Tiny Diny (+10s)</button>
+          <button id="boostDonut" class="primary">Donut (+30s)</button>
+          <button id="boostMoney" class="primary">Money Gun (Reveal Letter)</button>
+          <button id="boostGalaxy" class="primary">Galaxy (Reveal Word)</button>
+        </div>
+
         <div class="badge" style="margin-top:12px;">
           Tip: In OBS, add Browser Source → http://localhost:3000/overlay
         </div>
