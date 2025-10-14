@@ -12,8 +12,11 @@ async function refreshState() {
   const res = await fetch("/api/state");
   const json = await res.json();
   const s = document.getElementById("state");
+  // Build status string including mode and poll info
+  const modeStr = json.mode ? `Mode: ${json.mode}` : "";
+  const pollStr = json.poll ? ` | Poll: active` : "";
   s.textContent =
-    `Room: ${json.connectedRoom || "-"} | Running: ${json.isRunning ? "Yes" : "No"} | Secret set: ${json.secretSet ? "Yes" : "No"} | Winner: ${json.winner ? json.winner.nickname : "-"}`;
+    `Room: ${json.connectedRoom || "-"} | Running: ${json.isRunning ? "Yes" : "No"} | Secret set: ${json.secretSet ? "Yes" : "No"} | Winner: ${json.winner ? json.winner.nickname : "-"} | ${modeStr}${pollStr}`;
 }
 
 function toast(msg, ok = true) {
@@ -49,8 +52,18 @@ document.getElementById("setword").onclick = async () => {
   try {
     const word = document.getElementById("word").value.trim();
     if (!word) return toast("Enter a word/phrase first", false);
+    // Send the secret word to the server to start a new round
     await api("/api/set-word", { word });
-    toast("Round started.");
+    // If the admin has specified a timer value in seconds, apply it
+    const timerStr = document.getElementById("timerSeconds").value.trim();
+    const secs = Number(timerStr);
+    if (secs && !isNaN(secs) && secs > 0) {
+      // Call update-timer immediately so the new round uses the desired duration
+      await api("/api/update-timer", { seconds: secs });
+      toast(`Round started with ${secs} seconds.`);
+    } else {
+      toast("Round started.");
+    }
     refreshState();
   } catch (e) {
     toast(String(e.message || e), false);
@@ -131,6 +144,103 @@ document.getElementById("revealWord").onclick = async () => {
   try {
     await api("/api/reveal-word");
     toast("Word revealed.");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Set the game mode based on the selection in modeSelect. Valid options are
+// 'classic' and 'rapid'. After changing the mode, refresh the state.
+document.getElementById("setMode").onclick = async () => {
+  try {
+    const mode = document.getElementById("modeSelect").value;
+    await api("/api/mode", { mode });
+    toast(`Mode set to ${mode}.`);
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Start a vote between classic and rapid modes. Reads duration (in seconds)
+// from pollDuration. If invalid, defaults to 20 seconds. Starts a poll
+// using /api/poll/start. Refresh the state after starting.
+document.getElementById("startPoll").onclick = async () => {
+  try {
+    let dur = parseInt(document.getElementById("pollDuration").value.trim(), 10);
+    if (!dur || dur < 5) dur = 20;
+    await api("/api/poll/start", { question: "Choose game mode", options: ["classic", "rapid"], durationMs: dur * 1000 });
+    toast(`Vote started for ${dur} seconds.`);
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Stop the current vote. Calls /api/poll/stop. Refreshes state afterward.
+document.getElementById("stopPoll").onclick = async () => {
+  try {
+    await api("/api/poll/stop");
+    toast("Vote stopped.");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Reset all user tiers and scores. Calls /api/users/reset and refreshes state.
+document.getElementById("resetUsers").onclick = async () => {
+  try {
+    await api("/api/users/reset");
+    toast("All tiers and scores reset.");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// ===================
+// Monetization buttons
+// ===================
+// Tiny Diny: add 10 seconds to the timer
+document.getElementById("boostTiny").onclick = async () => {
+  try {
+    await api("/api/boost/prompt", { extraTimeMs: 10000 });
+    toast("+10 seconds added (Tiny Diny)");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Donut: add 30 seconds to the timer
+document.getElementById("boostDonut").onclick = async () => {
+  try {
+    await api("/api/boost/add-time", { ms: 30000 });
+    toast("+30 seconds added (Donut)");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Money Gun: reveal a random letter
+document.getElementById("boostMoney").onclick = async () => {
+  try {
+    await api("/api/boost/reveal-letter");
+    toast("A letter revealed (Money Gun)");
+    refreshState();
+  } catch (e) {
+    toast(String(e.message || e), false);
+  }
+};
+
+// Galaxy: reveal the entire word
+document.getElementById("boostGalaxy").onclick = async () => {
+  try {
+    await api("/api/boost/reveal-word");
+    toast("Word fully revealed (Galaxy)");
     refreshState();
   } catch (e) {
     toast(String(e.message || e), false);
