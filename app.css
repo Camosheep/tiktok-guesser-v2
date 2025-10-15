@@ -45,6 +45,17 @@ h3 {
   font-weight: 700;
 }
 
+/* Style for section headings in the admin panel. These headings
+   break the controls into logical groups and provide visual
+   separation without needing additional margins on the rows. */
+h3 {
+  margin-top: 24px;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
 .row {
   display: flex;
   gap: 12px;
@@ -178,8 +189,8 @@ button.danger {
    masked word. Larger font for visibility and centered horizontally. */
 .timerText {
   margin-top: 8px;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
   text-align: center;
   color: var(--accent);
 }
@@ -226,4 +237,47 @@ button.danger {
   text-align: left;
   color: var(--muted);
   line-height: 1.4;
+}
+
+/* Poll styling for the overlay. Includes a header with voting
+   instructions, rows with labels and progress bars for each option,
+   and a footer showing either a countdown or the winner. */
+.pollHeader {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.pollRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: var(--text);
+}
+.pollLabel {
+  width: 70px;
+  text-transform: capitalize;
+}
+.pollBar {
+  flex-grow: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 8px;
+}
+.pollBarFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s linear;
+}
+.pollCount {
+  width: 70px;
+  text-align: right;
+}
+.pollResult, .pollCountdown {
+  font-size: 14px;
+  margin-top: 4px;
+  color: var(--muted);
 }
