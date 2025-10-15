@@ -204,3 +204,84 @@ button.danger {
   opacity: 0.8;
   transition: opacity 0.5s ease;
 }
+
+.timerText {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+
+
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  
+.winnerPopup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  margin-top: 0;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(143, 255, 160, 0.2), rgba(143, 255, 160, 0.05));
+  color: var(--ok);
+  font-weight: 700;
+  font-size: 22px;
+  text-align: center;
+}
+
+h3 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.leaderboard {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Poll UI styles */
+.pollHeader {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+}
+.pollRow {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+.pollLabel {
+  flex: 0 0 80px;
+  font-weight: 600;
+}
+.pollBar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin-right: 8px;
+  overflow: hidden;
+}
+.pollBarFill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.5s ease;
+}
+.pollCount {
+  flex: 0 0 40px;
+  text-align: right;
+}
