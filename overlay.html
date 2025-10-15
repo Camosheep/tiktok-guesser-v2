@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>TikTok Guessing Game Overlay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="/app.css" rel="stylesheet" />
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h2>Guessing Game</h2>
+        <div id="overlay-status" class="status">Waiting for connection…</div>
+
+        <!-- Poll container: shows live voting progress when a vote is active -->
+        <div id="poll" style="margin-top:8px; display:none; font-size:14px; color: var(--muted);"></div>
+
+        <!-- Display the masked representation of the secret word. Letters that
+             have been revealed appear in their original case, while hidden
+             letters appear as underscores. This helps viewers follow along
+             without spoiling the word. -->
+        <div id="maskedWord" class="maskedWord" style="display:none;">_____</div>
+
+        <!-- Timer text showing remaining time for the current round in MM:SS format. When no
+             round is active, this element is hidden. The countdown is updated via JavaScript. -->
+        <div id="timerText" class="timerText" style="display:none;">00:00</div>
+
+        <!-- Boost hint / toast container. Displays periodic hints about monetization
+             actions (e.g. Tiny Diny adds +10s) and instant feedback when a
+             boost is triggered. Hidden by default and shown via JS. -->
+        <div id="boostHint" class="boostHint" style="display:none;"></div>
+
+        <!-- Leaderboard container: displays the top players by number of wins.
+             Initially hidden until the server sends leaderboard data. -->
+        <div id="leaderboard" class="leaderboard" style="display:none;"></div>
+
+        <div id="winner" class="winnerBanner" style="display:none;"></div>
+
+        <div id="chat" class="chat"></div>
+      </div>
+    </div>
+
+    <script src="/overlay.js"></script>
+  </body>
+</html>
