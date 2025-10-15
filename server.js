@@ -313,6 +313,9 @@ async function connectTikTok(uniqueId) {
         tier: userRecord.tier,
         tierChanged,
       });
+
+      // Broadcast updated leaderboard so overlays can display top players
+      broadcastLeaderboard();
     }
   });
 
@@ -357,6 +360,28 @@ app.post("/api/start", async (req, res) => {
     return res.status(500).json({ error: String(e?.message || e) });
   }
 });
+
+// Compute a leaderboard from the users object. Sorts by wins_total in
+// descending order and returns an array of entries with userId,
+// display_name, wins_total and tier. Limits the result to the top
+// 10 players. If no users have any wins yet, returns an empty array.
+function computeLeaderboard() {
+  const arr = Object.values(users).map((u) => ({
+    userId: u.userId,
+    display_name: u.display_name,
+    wins_total: u.wins_total,
+    tier: u.tier,
+  }));
+  arr.sort((a, b) => b.wins_total - a.wins_total);
+  return arr.filter((x) => x.wins_total > 0).slice(0, 10);
+}
+
+// Broadcast the current leaderboard to all connected overlays. The
+// leaderboard event contains an array of entries sorted by wins.
+function broadcastLeaderboard() {
+  const leaderboard = computeLeaderboard();
+  io.emit("leaderboard", { leaderboard });
+}
 
 app.post("/api/stop", (req, res) => {
   disconnectTikTok();
@@ -423,6 +448,7 @@ app.post("/api/poll/stop", (req, res) => {
 app.post("/api/users/reset", (req, res) => {
   resetAllUsers();
   io.emit("state", { users });
+  broadcastLeaderboard();
   return res.json({ ok: true });
 });
 
@@ -660,6 +686,7 @@ app.get("/api/state", (req, res) => {
     mode: gameMode,
     users,
     poll: pollState ? { question: pollState.question, options: pollState.options, tallies: pollState.tallies, endsAt: pollState.endsAt } : null,
+    leaderboard: computeLeaderboard(),
   });
 });
 
@@ -682,6 +709,7 @@ io.on("connection", (socket) => {
     mode: gameMode,
     users,
     poll: pollState ? { question: pollState.question, options: pollState.options, tallies: pollState.tallies, endsAt: pollState.endsAt } : null,
+    leaderboard: computeLeaderboard(),
   });
 });
 
