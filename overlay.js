@@ -430,16 +430,4 @@ function playWinnerSound() {
   }
 }
 
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.value = 880;      // Frequency in Hz (A5 note)
-    gain.gain.value = 0.2;          // Volume
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.3); // Play for 300 ms
-  } catch (e) {
-    // Silently ignore if audio cannot be played
-  }
-}
+   
