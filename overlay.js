@@ -420,12 +420,16 @@ function updateTimerText() {
 // Regularly update the timer text to reflect the countdown.
 setInterval(updateTimerText, 1000);
 
-// Play a short "ding" sound when a user wins. This uses the Web Audio API to
-// synthesize a simple sine wave beep. If the AudioContext is not available
-// (e.g. older browsers or user gesture restrictions), this function fails silently.
+/// Play a short notification sound when a user wins.
 function playWinnerSound() {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audio = new Audio('/sound.wav');
+    audio.play().catch(() => {});
+  } catch (e) {
+    // silently ignore errors
+  }
+}
+
     const ctx = new AudioContext();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
