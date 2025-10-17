@@ -47,6 +47,11 @@ app.get(["/admin", "/admin.html"], (req, res) => {
 app.get(["/overlay", "/overlay.html"], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'overlay.html'));
 });
+// Serve the winner sound file
+app.get('/sound.wav', (req, res) => {
+  res.sendFile(path.join(__dirname, 'sound.wav'));
+});
+
 
 // Game state
 let ttConnection = null;
