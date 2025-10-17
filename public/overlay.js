@@ -152,7 +152,8 @@ function showWinner({ nickname, guess, highlightMs }) {
   winnerEl.className = "winnerPopup";
   winnerEl.style.display = "block";
   // Compose the popup text: WINNER: @nickname
-  winnerEl.textContent = `WINNER: ${nickname}`;
+  winnerEl.
+        playWinnerSound();= `WINNER: ${nickname}`;
 }
 
 function clearWinnerBannerIfExpired() {
@@ -163,6 +164,19 @@ function clearWinnerBannerIfExpired() {
 }
 
 setInterval(clearWinnerBannerIfExpired, 1000);
+
+// Preload winner sound and define play function
+const winnerAudio = new Audio('/sound.wav');
+winnerAudio.load();
+function playWinnerSound() {
+  try {
+    winnerAudio.currentTime = 0;
+    winnerAudio.play().catch(() => {});
+  } catch (e) {
+    // ignore errors
+  }
+}
+
 
 // Render the leaderboard. Accepts an array of entries sorted by
 // descending wins_total. Each entry should have display_name, wins_total,
